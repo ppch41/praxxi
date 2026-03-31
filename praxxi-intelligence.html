@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PRAXXI Intelligence</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/umd/lucide.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --navy: #1b2838;
+    --dark-blue: #1e3a5f;
+    --mid-blue: #2b6490;
+    --accent-blue: #3498db;
+    --orange: #e67e22;
+    --light-gray: #f0f4f8;
+    --white: #ffffff;
+    --green: #27ae60;
+    --red: #e74c3c;
+    --yellow: #f39c12;
+    --dark-text: #2c3e50;
+  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f7fa; min-height: 100vh; }
+
+  /* NAV */
+  .navbar { background: var(--navy); display: flex; align-items: center; height: 56px; padding: 0 24px; gap: 0; }
+  .nav-logo { font-weight: 800; font-size: 20px; color: var(--white); letter-spacing: 2px; margin-right: 32px; }
+  .nav-logo span { font-weight: 400; font-size: 14px; color: var(--accent-blue); }
+  .nav-tabs { display: flex; gap: 2px; flex: 1; }
+  .nav-tab { background: transparent; border: none; color: rgba(255,255,255,0.5); padding: 8px 16px; border-radius: 6px 6px 0 0; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 400; border-bottom: 2px solid transparent; transition: all 0.2s; }
+  .nav-tab:hover { color: rgba(255,255,255,0.8); }
+  .nav-tab.active { background: var(--dark-blue); color: var(--white); font-weight: 600; border-bottom-color: var(--orange); }
+  .nav-demo { color: rgba(255,255,255,0.4); font-size: 12px; }
+
+  /* LAYOUT */
+  .container { max-width: 1200px; margin: 0 auto; padding: 24px 24px 48px; }
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* SECTION HEADER */
+  .section-tag { color: var(--orange); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px; }
+  .section-title { font-size: 22px; font-weight: 700; color: var(--dark-text); margin: 0; }
+  .section-sub { font-size: 13px; color: #7f8c8d; margin-top: 4px; }
+  .section-header { margin-bottom: 24px; }
+
+  /* CARD */
+  .card { background: var(--white); border-radius: 10px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); border: 1px solid #e8edf2; transition: all 0.2s; }
+  .card.clickable { cursor: pointer; }
+  .card.clickable:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+
+  /* BADGE */
+  .badge { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px; display: inline-block; }
+
+  /* GRID */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+
+  /* STATUS DOT */
+  .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; }
+  .status-dot.ok { background: var(--green); }
+  .status-dot.warning { background: var(--yellow); }
+  .status-dot.error { background: var(--red); }
+
+  /* TABLE */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead tr { background: var(--light-gray); }
+  thead th { text-align: left; padding: 10px 16px; font-weight: 600; color: #7f8c8d; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+  tbody tr { border-top: 1px solid #f0f0f0; }
+  tbody tr:hover { background: #fafbfc; }
+  tbody td { padding: 10px 16px; }
+
+  /* SOURCE CARD */
+  .source-icon { width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .source-header { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+  .source-name { font-weight: 700; font-size: 14px; color: var(--dark-text); }
+  .source-desc { font-size: 11px; color: #95a5a6; }
+  .source-badges { display: flex; gap: 8px; }
+  .source-inputs { margin-top: 12px; padding: 12px; background: var(--light-gray); border-radius: 8px; display: none; }
+  .source-inputs.open { display: block; }
+  .source-inputs-title { font-size: 11px; font-weight: 700; color: var(--dark-text); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+  .source-input-item { display: flex; align-items: center; gap: 8px; padding: 4px 0; font-size: 13px; color: var(--dark-text); }
+
+  /* FOOTER SUMMARY */
+  .footer-summary { margin-top: 20px; padding: 16px; background: rgba(27,40,56,0.04); border-radius: 10px; border: 1px dashed rgba(43,100,144,0.25); font-size: 13px; color: var(--dark-text); display: flex; align-items: center; gap: 12px; }
+
+  /* REGULATION ACCORDION */
+  .reg-header { display: flex; align-items: center; padding: 16px 20px; cursor: pointer; }
+  .reg-header:hover { background: #fafbfc; }
+  .reg-category { font-weight: 700; font-size: 15px; color: var(--dark-text); }
+  .reg-count { font-size: 12px; color: #95a5a6; }
+
+  /* FILTER BUTTONS */
+  .filter-group { display: flex; gap: 8px; margin-bottom: 16px; }
+  .filter-btn { border: none; padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+  .filter-btn.active { background: var(--dark-blue); color: var(--white); }
+  .filter-btn:not(.active) { background: #e8edf2; color: var(--dark-text); }
+
+  /* KPI CARD */
+  .kpi-card { display: flex; align-items: center; gap: 12px; }
+  .kpi-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+  .kpi-value { font-size: 24px; font-weight: 800; }
+  .kpi-label { font-size: 11px; color: #95a5a6; }
+
+  /* BOW TIE */
+  .bowtie-layout { display: flex; align-items: stretch; gap: 0; margin-top: 8px; }
+  .bowtie-col { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+  .bowtie-barriers { width: 190px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .bowtie-center { width: 160px; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 12px; }
+  .bowtie-event { width: 130px; height: 130px; border-radius: 50%; background: linear-gradient(135deg, var(--red), #c0392b); display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; box-shadow: 0 4px 20px rgba(231,76,60,0.3); }
+  .bowtie-event-label { font-size: 12px; font-weight: 800; margin-top: 6px; text-align: center; line-height: 1.2; }
+  .bowtie-event-sub { font-size: 10px; opacity: 0.8; }
+  .bowtie-col-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; text-align: center; }
+  .bowtie-threat { background: white; border-radius: 8px; padding: 10px 14px; border: 1px solid #e8edf2; display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: var(--dark-text); }
+  .barrier-box { width: 100%; text-align: center; padding: 6px 8px; border-radius: 6px; font-size: 10px; font-weight: 600; border-width: 2px; border-style: solid; }
+  .barrier-ok { background: rgba(39,174,96,0.08); border-color: var(--green); color: var(--green); }
+  .barrier-degraded { background: rgba(243,156,18,0.08); border-color: var(--yellow); color: var(--yellow); }
+
+  /* PROGRESS BAR */
+  .progress-track { height: 8px; background: #e8edf2; border-radius: 4px; flex: 1; }
+  .progress-fill { height: 8px; border-radius: 4px; transition: width 0.5s; }
+
+  /* TABS */
+  .tab-group { display: flex; gap: 8px; margin-bottom: 20px; }
+  .tab-btn { border: none; padding: 8px 20px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
+
+  /* RECOGNITION CARD */
+  .recognition-card { border-left: 4px solid; }
+
+  /* NAV FOOTER */
+  .nav-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 24px; }
+  .nav-btn { display: flex; align-items: center; gap: 6px; border: none; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .nav-btn.enabled { background: var(--dark-blue); color: var(--white); }
+  .nav-btn.disabled { background: #ddd; color: #999; cursor: default; }
+  .nav-counter { font-size: 13px; color: #95a5a6; }
+
+  /* ROI TABLE */
+  .roi-table thead tr { background: var(--navy); color: white; }
+  .roi-table thead th { color: white; }
+  .roi-total { background: var(--light-gray); border-top: 2px solid #ccc; }
+
+  /* SEVERITY */
+  .severity { padding: 3px 10px; border-radius: 4px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+  .severity-critical { background: rgba(231,76,60,0.1); color: var(--red); }
+  .severity-high { background: rgba(230,126,34,0.1); color: var(--orange); }
+  .severity-medium { background: rgba(243,156,18,0.1); color: var(--yellow); }
+  .severity-low { background: rgba(149,165,166,0.1); color: #95a5a6; }
+
+  /* ACTION TAG */
+  .action-tag { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 4px; font-size: 12px; margin: 2px; }
+  .action-tag.done { background: rgba(39,174,96,0.08); color: var(--green); }
+  .action-tag.pending { background: var(--light-gray); color: #555; }
+
+  /* DISCLAIMER */
+  .disclaimer { margin-top: 16px; padding: 14px; background: rgba(230,126,34,0.05); border-radius: 8px; border: 1px solid rgba(230,126,34,0.2); font-size: 12px; color: #7f6c3e; }
+
+  /* CONNECTORS (lines for bow tie) */
+  .connector-line { display: flex; align-items: center; }
+  .connector-line::before { content: ''; flex: 1; height: 1px; background: #ccc; }
+
+  /* RISK MAP */
+  .risk-map-container { position: relative; width: 100%; height: 480px; background: #1a2633; border-radius: 12px; overflow: hidden; }
+  .risk-map-bg { width: 100%; height: 100%; position: relative; }
+  .map-zone { position: absolute; border-radius: 8px; border: 1px dashed rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 11px; color: rgba(255,255,255,0.5); font-weight: 600; letter-spacing: 0.5px; }
+  .map-dot { position: absolute; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; color: white; cursor: pointer; transition: transform 0.2s; z-index: 2; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+  .map-dot:hover { transform: scale(1.4); z-index: 10; }
+  .map-dot .pulse { position: absolute; width: 100%; height: 100%; border-radius: 50%; animation: pulse 2s infinite; }
+  @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(231,76,60,0.5); } 70% { box-shadow: 0 0 0 12px rgba(231,76,60,0); } 100% { box-shadow: 0 0 0 0 rgba(231,76,60,0); } }
+  .map-legend { position: absolute; bottom: 12px; left: 12px; background: rgba(0,0,0,0.7); border-radius: 8px; padding: 10px 14px; display: flex; gap: 16px; }
+  .map-legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: rgba(255,255,255,0.8); }
+  .map-legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .map-timestamp { position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.7); border-radius: 6px; padding: 6px 12px; font-size: 11px; color: #3498db; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+  .map-zone-label { position: absolute; top: 4px; left: 8px; font-size: 9px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1px; }
+
+  .risk-detail-panel { background: white; border-radius: 10px; padding: 16px; border: 1px solid #e8edf2; margin-top: 16px; }
+  .risk-gauge { width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 800; color: white; flex-shrink: 0; }
+  .risk-factor-bar { height: 6px; border-radius: 3px; background: #e8edf2; flex: 1; }
+  .risk-factor-fill { height: 6px; border-radius: 3px; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<div class="navbar">
+  <div class="nav-logo">PRAXXI <span>Intelligence</span></div>
+  <div class="nav-tabs" id="navTabs"></div>
+  <div class="nav-demo">Minera Pacífico · Demo</div>
+</div>
+
+<div class="container">
+
+<!-- ══════════════════════════════════════════ -->
+<!-- VISTA 1: FUENTES DE DATOS                -->
+<!-- ══════════════════════════════════════════ -->
+<div class="view" id="view1">
+  <div class="section-header">
+    <div class="section-tag">Vista 1 · Fuentes de datos</div>
+    <h2 class="section-title">Integración de fuentes operacionales</h2>
+    <p class="section-sub">Todas las fuentes de datos que PRAXXI Intelligence conecta y monitorea en tiempo real para Minera Pacífico.</p>
+  </div>
+  <div class="grid-2" id="sourcesGrid"></div>
+  <div class="footer-summary">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e67e22" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+    <span><strong>Total:</strong> 8 fuentes conectadas · <strong>26.5M+</strong> registros indexados · Latencia promedio: <strong>&lt;3 seg</strong></span>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- VISTA 2: MARCO NORMATIVO                 -->
+<!-- ══════════════════════════════════════════ -->
+<div class="view" id="view2">
+  <div class="section-header">
+    <div class="section-tag">Vista 2 · Marco normativo</div>
+    <h2 class="section-title">Normas, leyes y estándares aplicables</h2>
+    <p class="section-sub">Marco regulatorio y mejores prácticas que aplican a Minera Pacífico según su actividad, ubicación y riesgos.</p>
+  </div>
+  <div id="regulationsContainer"></div>
+  <div class="footer-summary" style="margin-top:20px">
+    <span><strong>Total:</strong> <span id="regTotal"></span> normativas mapeadas · 4 categorías · Actualización automática ante cambios regulatorios</span>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- VISTA 3: CUMPLIMIENTOS Y BRECHAS         -->
+<!-- ══════════════════════════════════════════ -->
+<div class="view" id="view3">
+  <div class="section-header">
+    <div class="section-tag">Vista 3 · Análisis de brechas</div>
+    <h2 class="section-title">Cumplimientos y desviaciones detectadas</h2>
+    <p class="section-sub">Match automático entre datos operacionales (Vista 1) y requisitos normativos (Vista 2).</p>
+  </div>
+  <div class="grid-4" id="gapKpis" style="margin-bottom:20px"></div>
+  <div class="filter-group" id="gapFilters"></div>
+  <div class="card" style="padding:0;overflow:hidden">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Estado</th><th>Área</th><th>Norma</th><th>Requisito</th><th>Fuente</th><th>Severidad</th></tr>
+        </thead>
+        <tbody id="gapTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+  <div style="margin-top:12px;font-size:12px;color:#95a5a6;font-style:italic">Hover sobre cada fila para ver el detalle de la detección.</div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- VISTA 4: BOW TIE                         -->
+<!-- ══════════════════════════════════════════ -->
+<div class="view" id="view4">
+  <div class="section-header">
+    <div class="section-tag">Vista 4 · Bow Tie</div>
+    <h2 class="section-title">Análisis de barreras — Volcamiento de CAEX</h2>
+    <p class="section-sub">Riesgo crítico #1 de Minera Pacífico. Visualización de amenazas, evento top y consecuencias con estado de barreras.</p>
+  </div>
+  <div class="bowtie-layout" id="bowtieLayout"></div>
+  <div class="grid-3" style="margin-top:24px" id="barrierSummary"></div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- VISTA 5: GESTIÓN                         -->
+<!-- ══════════════════════════════════════════ -->
+<div class="view" id="view5">
+  <div class="section-header">
+    <div class="section-tag">Vista 5 · Gestión</div>
+    <h2 class="section-title">Reconocimientos y planes de cierre</h2>
+    <p class="section-sub">Gestión positiva del cumplimiento y seguimiento activo de brechas hasta su resolución.</p>
+  </div>
+  <div class="tab-group" id="view5Tabs"></div>
+  <div id="view5Content"></div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- VISTA 6: ÍNDICE DE RIESGO INDIVIDUAL    -->
+<!-- ══════════════════════════════════════════ -->
+<div class="view" id="view7" style="background:#0d1b2a;margin:-24px -24px 0;padding:24px 24px 32px;border-radius:0">
+  <div class="section-header">
+    <div class="section-tag" style="color:#e67e22">Vista 6 · Índice de riesgo individual</div>
+    <h2 class="section-title" style="color:white">Mapa de riesgo en tiempo real</h2>
+    <p class="section-sub" style="color:#5a7a90">Índice de riesgo calculado por persona/equipo, integrando todas las fuentes de datos. Actualización continua 24/7.</p>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px" id="riskKpis"></div>
+  <div style="display:flex;gap:16px">
+    <div style="flex:2">
+      <div class="risk-map-container" id="riskMap" style="height:500px;border:1px solid #2a4a63"></div>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;gap:6px;max-height:500px;overflow-y:auto" id="riskRanking"></div>
+  </div>
+  <div id="riskDetailPanel" style="margin-top:16px"></div>
+  <div style="margin-top:16px;padding:12px 16px;background:#162535;border-radius:8px;border:1px solid #1e3a52;font-size:12px;color:#5a7a90;display:flex;align-items:center;gap:10px">
+    <span style="color:#5dade2;font-weight:700">MODELO:</span> Índice compuesto ponderado con 6 factores · Recalculado cada 30 seg · Umbral de alerta: ≥70 · Umbral crítico: ≥85 · Alimentado por todas las fuentes de Vista 1
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- VISTA 7: ROI                             -->
+<!-- ══════════════════════════════════════════ -->
+<div class="view" id="view6">
+  <div class="section-header">
+    <div class="section-tag">Vista 7 · Retorno de inversión</div>
+    <h2 class="section-title">Cálculo de ROI — PRAXXI Intelligence</h2>
+    <p class="section-sub">Proyección anual basada en datos históricos de Minera Pacífico y benchmarks de industria.</p>
+  </div>
+  <div class="grid-4" id="roiKpis" style="margin-bottom:24px"></div>
+  <div class="card" style="padding:0;overflow:hidden" id="roiTableCard"></div>
+  <div class="disclaimer">
+    <strong>Nota:</strong> Los valores son estimaciones basadas en promedios de industria minera en Chile y datos históricos del cliente. El costo por evento incluye costos directos, indirectos (Método de Heinrich ×4) y costos reputacionales estimados. Cifras sujetas a validación con el cliente.
+  </div>
+</div>
+
+<!-- NAV FOOTER -->
+<div class="nav-footer">
+  <button class="nav-btn" id="btnPrev" onclick="navigate(-1)">← Anterior</button>
+  <span class="nav-counter" id="navCounter"></span>
+  <button class="nav-btn" id="btnNext" onclick="navigate(1)">Siguiente →</button>
+</div>
+
+</div><!-- /container -->
+
+<script>
+// ══════════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════════
+const dataSources = [
+  { id:"gps", name:"GPS / Geolocalización", icon:"map-pin", color:"#2ecc71", status:"ok", records:"2.4M", frequency:"Cada 5 seg",
+    inputs:["Coordenadas lat/lng en tiempo real","Velocidad instantánea y promedio","Dirección y rumbo del vehículo","Geocercas y zonas de exclusión","Historial de rutas y paradas","Tiempo en zona de riesgo"],
+    description:"Posicionamiento de flota y personal en toda la operación minera." },
+  { id:"iot", name:"IoT / Sensores Ambientales", icon:"cpu", color:"#3498db", status:"ok", records:"8.1M", frequency:"Cada 10 seg",
+    inputs:["Temperatura ambiente y de equipos","Vibración mecánica (acelerómetros)","Nivel de gases (CO, CH4, H2S, NOx)","Humedad relativa","Presión atmosférica","Niveles de polvo (PM2.5, PM10)","Ruido ambiental (dB)"],
+    description:"Red de sensores distribuidos en faenas, plantas y equipos críticos." },
+  { id:"fleet", name:"Mantenimiento de Flota", icon:"truck", color:"#e67e22", status:"warning", records:"156K", frequency:"Por evento",
+    inputs:["Horas de operación por equipo","Historial de mantenciones (preventivas/correctivas)","Consumo de combustible y lubricantes","Estado de neumáticos y componentes críticos","Alertas de sobrecarga y fatiga de material","Check-list pre-operacional diario"],
+    description:"Gestión de vida útil y estado mecánico de equipos pesados y livianos." },
+  { id:"cameras", name:"Cámaras / Visión Computacional", icon:"camera", color:"#9b59b6", status:"ok", records:"540K", frequency:"Streaming",
+    inputs:["Detección de EPP (casco, chaleco, guantes)","Reconocimiento de posturas de riesgo","Conteo de personas en zonas restringidas","Detección de vehículos no autorizados","Análisis de fatiga facial (operadores)","Eventos de colisión o casi-colisión"],
+    description:"Análisis de video en tiempo real con modelos de IA entrenados para minería." },
+  { id:"incidents", name:"Reportes de Incidentes", icon:"file-text", color:"#e74c3c", status:"ok", records:"12.3K", frequency:"Manual + auto",
+    inputs:["Tipo de incidente (accidente, casi-accidente, condición insegura)","Severidad y potencial de gravedad","Área, turno y equipo involucrado","Descripción y causa inmediata","Fotos y evidencia adjunta","Estado de investigación y cierre"],
+    description:"Base histórica de incidentes con clasificación por pirámide de Bird." },
+  { id:"health", name:"Salud Ocupacional", icon:"activity", color:"#1abc9c", status:"ok", records:"89K", frequency:"Diario",
+    inputs:["Exámenes pre-ocupacionales y periódicos","Control de fatiga y somnolencia","Alcohol y drogas (test aleatorios)","Exposición acumulada a agentes (ruido, sílice, radiación)","Aptitud médica vigente","Restricciones laborales activas"],
+    description:"Datos de vigilancia epidemiológica y control de fatiga del personal." },
+  { id:"contractors", name:"Gestión de Contratistas", icon:"users", color:"#34495e", status:"warning", records:"34K", frequency:"Por evento",
+    inputs:["Registro de empresas y trabajadores","Certificaciones y competencias vigentes","Historial de desempeño en seguridad (tasa de accidentes)","Cumplimiento de protocolos del mandante","Documentación contractual y seguros","Sanciones y no conformidades previas"],
+    description:"Control integral de proveedores y subcontratistas en faena." },
+  { id:"scada", name:"SCADA / Procesos Industriales", icon:"gauge", color:"#2c3e50", status:"ok", records:"15.2M", frequency:"Cada 1 seg",
+    inputs:["Presiones de líneas y ductos","Caudales de proceso","Niveles de estanques y relaves","Estado de bombas, compresores, chancadores","Alarmas de proceso activas","Parámetros de operación vs. set-points"],
+    description:"Datos de control de procesos de planta concentradora y sistemas auxiliares." }
+];
+
+const regulations = [
+  { category:"Legislación Nacional", color:"#c0392b", items:[
+    { code:"Ley 16.744", name:"Seguro Social contra Accidentes del Trabajo y Enfermedades Profesionales", scope:"Obligaciones del empleador, cotización, prestaciones", applicability:"Toda la operación" },
+    { code:"D.S. 132", name:"Reglamento de Seguridad Minera (SERNAGEOMIN)", scope:"Condiciones de seguridad en faenas mineras, ventilación, fortificación, transporte", applicability:"Mina, planta, transporte" },
+    { code:"D.S. 594", name:"Condiciones Sanitarias y Ambientales Básicas en Lugares de Trabajo", scope:"Límites de exposición ocupacional, condiciones ambientales, servicios higiénicos", applicability:"Toda la operación" },
+    { code:"D.S. 40", name:"Reglamento sobre Prevención de Riesgos Profesionales", scope:"Derecho a saber, obligación de informar riesgos, comités paritarios", applicability:"Toda la operación" },
+    { code:"D.S. 54", name:"Comités Paritarios de Higiene y Seguridad", scope:"Constitución, funciones y atribuciones de comités paritarios", applicability:"Toda la operación" },
+    { code:"Ley 20.123", name:"Subcontratación y Empresas de Servicios Transitorios", scope:"Responsabilidad solidaria, condiciones de seguridad para contratistas", applicability:"Contratistas" },
+  ]},
+  { category:"Normativa Sectorial Minera", color:"#2980b9", items:[
+    { code:"Guía SERNAGEOMIN", name:"Sistema de Gestión de Seguridad Minera (SGSM)", scope:"Implementación de SGSM, auditorías, planes de emergencia", applicability:"Toda la operación" },
+    { code:"Res. Ex. 2.163", name:"Protocolo de Exposición Ocupacional a Sílice", scope:"Límites de exposición, monitoreo, programa de vigilancia", applicability:"Mina, chancado" },
+    { code:"Res. Ex. 1.256", name:"Protocolo de Exposición al Ruido (PREXOR)", scope:"Evaluación, control y vigilancia de ruido ocupacional", applicability:"Mina, planta, mantención" },
+    { code:"D.S. 72/132", name:"Manejo de Sustancias Peligrosas en Minería", scope:"Almacenamiento, transporte y uso de explosivos y químicos", applicability:"Mina, polvorín, planta" },
+  ]},
+  { category:"Estándares Internacionales", color:"#27ae60", items:[
+    { code:"ISO 45001:2018", name:"Sistema de Gestión de Seguridad y Salud en el Trabajo", scope:"Marco de gestión SST, liderazgo, planificación, mejora continua", applicability:"Toda la operación" },
+    { code:"ISO 14001:2015", name:"Sistema de Gestión Ambiental", scope:"Aspectos ambientales, control operacional, respuesta ante emergencias", applicability:"Toda la operación" },
+    { code:"ISO 31000:2018", name:"Gestión de Riesgos — Directrices", scope:"Principios, marco de referencia y proceso de gestión de riesgos", applicability:"Toda la operación" },
+    { code:"ICMM 10 Principios", name:"Consejo Internacional de Minería y Metales", scope:"Desarrollo sostenible, salud y seguridad, gestión ambiental", applicability:"Corporativo" },
+  ]},
+  { category:"Recomendaciones de Industria", color:"#8e44ad", items:[
+    { code:"ICAM", name:"Metodología de Investigación de Incidentes (Anglo American)", scope:"Análisis causal, factores organizacionales, acciones correctivas", applicability:"Investigación" },
+    { code:"HAZOP / HAZID", name:"Análisis de Peligros Operacionales", scope:"Identificación sistemática de desviaciones en procesos", applicability:"Planta, procesos" },
+    { code:"Bow Tie", name:"Metodología de Análisis de Barreras", scope:"Identificación de amenazas, barreras preventivas y mitigadoras", applicability:"Riesgos críticos" },
+    { code:"Pirámide de Bird", name:"Ratio de Incidentes / Accidentes", scope:"Gestión proactiva basada en reporte de casi-accidentes y condiciones", applicability:"Toda la operación" },
+    { code:"Fatigue Risk Mgmt", name:"Gestión de Riesgo de Fatiga (ICMM)", scope:"Control de turnos, horas de descanso, monitoreo de somnolencia", applicability:"Operadores, transporte" },
+  ]}
+];
+
+const gapData = [
+  { area:"Mina Rajo Norte", norm:"D.S. 132 Art. 86", requirement:"Bermas de seguridad en caminos con altura ≥ 3/4 rueda del camión más grande", source:"GPS + Cámaras", status:"gap", severity:"critical", detail:"Sector curva km 4.2: berma mide 1.1m, mínimo requerido 1.8m. Detectado por análisis de imagen + topografía." },
+  { area:"Planta Chancado", norm:"D.S. 594 Art. 70", requirement:"Exposición a ruido no debe superar 85 dB(A) para 8 hrs", source:"IoT Sensores", status:"gap", severity:"high", detail:"Promedio últimas 4 semanas: 91 dB(A) en zona de chancado primario. 23 trabajadores expuestos." },
+  { area:"Transporte Mina", norm:"D.S. 132 Art. 369", requirement:"Operadores con máximo 12 hrs de conducción continua", source:"GPS + Salud", status:"compliant", severity:null, detail:"100% cumplimiento. Sistema de fatiga activo con alertas a 10 hrs." },
+  { area:"Polvorín Central", norm:"D.S. 72 Art. 210", requirement:"Almacenamiento de explosivos según compatibilidad química", source:"SCADA + Reportes", status:"compliant", severity:null, detail:"Auditoría automática de inventario conforme. Última verificación: hace 2 hrs." },
+  { area:"Taller Mantención", norm:"ISO 45001 §8.1.2", requirement:"Procedimientos de bloqueo/etiquetado (LOTO) para intervenciones", source:"Cámaras + Reportes", status:"gap", severity:"medium", detail:"3 de 12 intervenciones sin evidencia fotográfica de LOTO." },
+  { area:"Contratista ACME", norm:"Ley 20.123", requirement:"Documentación de seguridad vigente para personal en faena", source:"Gestión Contratistas", status:"gap", severity:"high", detail:"14 trabajadores con inducción vencida. 6 sin examen pre-ocupacional." },
+  { area:"Relave Sur", norm:"SERNAGEOMIN Guía", requirement:"Monitoreo de estabilidad de tranque con frecuencia mínima diaria", source:"IoT + SCADA", status:"compliant", severity:null, detail:"Piezómetros e inclinómetros cada 15 min. Sin desviaciones." },
+  { area:"Planta SAG", norm:"PREXOR", requirement:"Programa de vigilancia auditiva para expuestos a ruido >82 dB(A)", source:"Salud + IoT", status:"gap", severity:"medium", detail:"8 trabajadores sin audiometría del último semestre." },
+  { area:"Accesos Faena", norm:"D.S. 132 Art. 21", requirement:"Control de acceso con verificación de competencias y autorizaciones", source:"Cámaras + Contratistas", status:"compliant", severity:null, detail:"Sistema biométrico + validación automática. 99.8% efectividad." },
+  { area:"Flota CAEX", norm:"D.S. 132 Art. 372", requirement:"Check-list pre-operacional antes de cada turno", source:"Mantención Flota", status:"gap", severity:"low", detail:"Cumplimiento 87%. 13% sin check-list digital registrado." },
+];
+
+const threats = [
+  { name:"Falla mecánica de CAEX", barrier:"Check-list pre-op + mantención predictiva", status:"ok" },
+  { name:"Fatiga del operador", barrier:"Sistema anti-fatiga + control de turnos", status:"ok" },
+  { name:"Berma insuficiente", barrier:"Inspección topográfica + GPS geofence", status:"degraded" },
+  { name:"Exceso de velocidad", barrier:"GPS limitador + cámaras velocidad", status:"ok" },
+];
+const consequences = [
+  { name:"Lesión grave / fatalidad", barrier:"Respuesta de emergencia 24/7", status:"ok" },
+  { name:"Daño ambiental (derrame)", barrier:"Contención + plan de emergencia", status:"ok" },
+  { name:"Pérdida de equipo", barrier:"Seguro + protocolo de rescate", status:"ok" },
+  { name:"Paralización operativa", barrier:"Plan de contingencia operacional", status:"degraded" },
+];
+
+const recognitions = [
+  { area:"Transporte Mina", achievement:"100% cumplimiento de control de fatiga por 90 días consecutivos", date:"2026-03-20", level:"gold" },
+  { area:"Relave Sur", achievement:"Monitoreo de estabilidad sin interrupciones por 6 meses", date:"2026-03-15", level:"gold" },
+  { area:"Accesos Faena", achievement:"99.8% efectividad en control de acceso biométrico", date:"2026-03-10", level:"silver" },
+  { area:"Polvorín Central", achievement:"Auditoría de explosivos conforme 12 meses seguidos", date:"2026-03-01", level:"gold" },
+];
+
+const closurePlans = [
+  { id:"PC-001", gap:"Berma insuficiente km 4.2", severity:"critical", responsible:"Jefe de Mina", deadline:"2026-04-05", progress:35, actions:["Levantamiento topográfico actualizado","Orden de trabajo a contratista mov. tierras","Verificación post-construcción con drone"] },
+  { id:"PC-002", gap:"Ruido >85 dB en chancado", severity:"high", responsible:"Sup. Planta", deadline:"2026-04-15", progress:60, actions:["Medición con dosimetría personal (completada)","Evaluación de aislación acústica de cabinas","Compra de protectores auditivos doble protección"] },
+  { id:"PC-003", gap:"LOTO sin evidencia fotográfica", severity:"medium", responsible:"Jefe Mantención", deadline:"2026-04-01", progress:80, actions:["Capacitación refuerzo LOTO (completada)","Registro fotográfico obligatorio (completada)","Auditoría de verificación en curso"] },
+  { id:"PC-004", gap:"Contratista ACME: docs vencidos", severity:"high", responsible:"Adm. Contratos", deadline:"2026-03-30", progress:45, actions:["Notificación formal a ACME Ltda.","Bloqueo de acceso para 14 trabajadores","Plazo 5 días para regularización"] },
+  { id:"PC-005", gap:"Audiometrías pendientes PREXOR", severity:"medium", responsible:"Médico SSO", deadline:"2026-04-10", progress:25, actions:["Programación de exámenes con mutual","Citación de 8 trabajadores pendientes","Actualización de matriz de expuestos"] },
+];
+
+const roiItems = [
+  { category:"Reducción de accidentes con tiempo perdido", before:12, after:3, unit:"eventos/año", costPerUnit:85000 },
+  { category:"Reducción de multas regulatorias", before:4, after:0, unit:"multas/año", costPerUnit:120000 },
+  { category:"Reducción de paradas no programadas", before:45, after:18, unit:"días/año", costPerUnit:250000 },
+  { category:"Reducción de prima de seguro", before:2.8, after:1.9, unit:"% sobre prima", costPerUnit:1000000 },
+  { category:"Reducción de rotación por clima de seguridad", before:18, after:11, unit:"% anual", costPerUnit:15000 },
+  { category:"Sinergia de cargos HSEQ (consolidación de roles)", before:8, after:5, unit:"FTE", costPerUnit:72000 },
+  { category:"Sinergia de cargos RRHH (automatización de control documental)", before:3, after:1, unit:"FTE", costPerUnit:60000 },
+  { category:"Sinergia en gestión operacional (reportabilidad integrada)", before:4, after:2, unit:"FTE", costPerUnit:66000 },
+];
+const investmentAnnual = 480000;
+
+// ══════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════
+let currentView = 1;
+let expandedSource = null;
+let openRegCat = 0;
+let gapFilter = 'all';
+let view5Tab = 'plans';
+
+// ══════════════════════════════════════════════
+// ICONS (simple SVG helpers)
+// ══════════════════════════════════════════════
+function icon(name, size=16, color='currentColor') {
+  const icons = {
+    'map-pin': `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>`,
+    'cpu': `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg>`,
+    'truck': `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>`,
+    'camera': `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>`,
+    'file-text': `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>`,
+    'activity': `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>`,
+    'users': `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
+    'gauge': `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15l3.5-3.5"/><path d="M20.3 18c.4-1 .7-2.2.7-3.4C21 9.8 17 6 12 6S3 9.8 3 14.6c0 1.2.3 2.4.7 3.4"/></svg>`,
+    'database': `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>`,
+    'shield': `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,
+    'alert-triangle': `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
+    'git-branch': `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>`,
+    'award': `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>`,
+    'dollar-sign': `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>`,
+    'check-circle': `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`,
+    'x-circle': `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`,
+    'target': `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>`,
+    'alert-circle': `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
+    'chevron-right': `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`,
+    'chevron-down': `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>`,
+    'chevron-up': `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>`,
+    'clock': `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
+  };
+  return icons[name] || '';
+}
+
+// ══════════════════════════════════════════════
+// RENDER FUNCTIONS
+// ══════════════════════════════════════════════
+
+function renderNav() {
+  const views = [
+    { id:1, label:"Fuentes de Datos", ic:"database" },
+    { id:2, label:"Marco Normativo", ic:"shield" },
+    { id:3, label:"Brechas", ic:"alert-triangle" },
+    { id:4, label:"Bow Tie", ic:"git-branch" },
+    { id:5, label:"Gestión", ic:"award" },
+    { id:6, label:"Riesgo Individual", ic:"activity" },
+    { id:7, label:"ROI", ic:"dollar-sign" },
+  ];
+  document.getElementById('navTabs').innerHTML = views.map(v =>
+    `<button class="nav-tab ${currentView===v.id?'active':''}" onclick="setView(${v.id})">${icon(v.ic,14)} ${v.label}</button>`
+  ).join('');
+  document.querySelectorAll('.view').forEach((el,i) => el.classList.toggle('active', i+1===currentView));
+  const prev = document.getElementById('btnPrev');
+  const next = document.getElementById('btnNext');
+  prev.className = `nav-btn ${currentView>1?'enabled':'disabled'}`;
+  next.className = `nav-btn ${currentView<7?'enabled':'disabled'}`;
+  document.getElementById('navCounter').textContent = `Vista ${currentView} de 7`;
+}
+
+function setView(n) { currentView = n; renderNav(); renderCurrentView(); }
+function navigate(dir) { const nv = currentView+dir; if(nv>=1&&nv<=7) setView(nv); }
+
+function renderCurrentView() {
+  switch(currentView) {
+    case 1: renderView1(); break;
+    case 2: renderView2(); break;
+    case 3: renderView3(); break;
+    case 4: renderView4(); break;
+    case 5: renderView5(); break;
+    case 6: renderView7(); break;
+    case 7: renderView6(); break;
+  }
+}
+
+// VIEW 1
+function renderView1() {
+  const grid = document.getElementById('sourcesGrid');
+  grid.innerHTML = dataSources.map(src => `
+    <div class="card clickable" onclick="toggleSource('${src.id}')" style="border:${expandedSource===src.id?`2px solid ${src.color}`:'1px solid #e8edf2'}">
+      <div class="source-header">
+        <div class="source-icon" style="background:${src.color}15">${icon(src.icon, 20, src.color)}</div>
+        <div style="flex:1">
+          <div class="source-name">${src.name}</div>
+          <div class="source-desc">${src.description}</div>
+        </div>
+        <span class="status-dot ${src.status}"></span>
+      </div>
+      <div class="source-badges">
+        <span class="badge" style="background:${src.color}18;color:${src.color}">${src.records} registros</span>
+        <span class="badge" style="background:#7f8c8d18;color:#7f8c8d">${src.frequency}</span>
+      </div>
+      <div class="source-inputs ${expandedSource===src.id?'open':''}">
+        <div class="source-inputs-title">Datos de entrada</div>
+        ${src.inputs.map(inp => `<div class="source-input-item">${icon('chevron-right',12,src.color)} ${inp}</div>`).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+function toggleSource(id) { expandedSource = expandedSource===id?null:id; renderView1(); }
+
+// VIEW 2
+function renderView2() {
+  const container = document.getElementById('regulationsContainer');
+  let total = 0;
+  regulations.forEach(c => total += c.items.length);
+  document.getElementById('regTotal').textContent = total;
+
+  container.innerHTML = regulations.map((cat, ci) => `
+    <div class="card" style="padding:0;overflow:hidden;margin-bottom:12px">
+      <div class="reg-header" onclick="toggleRegCat(${ci})" style="border-left:4px solid ${cat.color}">
+        <div style="flex:1">
+          <div class="reg-category">${cat.category}</div>
+          <div class="reg-count">${cat.items.length} normativas</div>
+        </div>
+        ${icon(openRegCat===ci?'chevron-up':'chevron-down', 18, '#95a5a6')}
+      </div>
+      ${openRegCat===ci?`
+        <div style="border-top:1px solid #e8edf2">
+          <table>
+            <thead><tr><th>Código</th><th>Nombre</th><th>Alcance</th><th>Aplica a</th></tr></thead>
+            <tbody>
+              ${cat.items.map(item => `
+                <tr>
+                  <td style="font-weight:700;color:${cat.color};white-space:nowrap">${item.code}</td>
+                  <td style="font-weight:600;color:var(--dark-text)">${item.name}</td>
+                  <td style="color:#7f8c8d">${item.scope}</td>
+                  <td><span class="badge" style="background:${cat.color}18;color:${cat.color}">${item.applicability}</span></td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `:''}
+    </div>
+  `).join('');
+}
+function toggleRegCat(ci) { openRegCat = openRegCat===ci?-1:ci; renderView2(); }
+
+// VIEW 3
+function renderView3() {
+  const gaps = gapData.filter(g=>g.status==='gap').length;
+  const compliant = gapData.filter(g=>g.status==='compliant').length;
+  const criticals = gapData.filter(g=>g.severity==='critical').length;
+
+  const kpis = [
+    { label:"Total evaluados", value:gapData.length, ic:"target", color:"#3498db" },
+    { label:"Cumplimientos", value:compliant, ic:"check-circle", color:"#27ae60" },
+    { label:"Brechas", value:gaps, ic:"x-circle", color:"#e74c3c" },
+    { label:"Críticas", value:criticals, ic:"alert-circle", color:"#e74c3c" },
+  ];
+  document.getElementById('gapKpis').innerHTML = kpis.map(k => `
+    <div class="card kpi-card">
+      <div class="kpi-icon" style="background:${k.color}12">${icon(k.ic, 22, k.color)}</div>
+      <div><div class="kpi-value" style="color:${k.color}">${k.value}</div><div class="kpi-label">${k.label}</div></div>
+    </div>
+  `).join('');
+
+  const filters = [{key:'all',label:'Todos'},{key:'gap',label:'Solo brechas'},{key:'compliant',label:'Solo cumplimientos'}];
+  document.getElementById('gapFilters').innerHTML = filters.map(f =>
+    `<button class="filter-btn ${gapFilter===f.key?'active':''}" onclick="setGapFilter('${f.key}')">${f.label}</button>`
+  ).join('');
+
+  const filtered = gapFilter==='all'?gapData:gapData.filter(g=>g.status===gapFilter);
+  const sevColor = s => s==='critical'?'#e74c3c':s==='high'?'#e67e22':s==='medium'?'#f39c12':'#95a5a6';
+
+  document.getElementById('gapTableBody').innerHTML = filtered.map(row => `
+    <tr title="${row.detail}">
+      <td>${row.status==='compliant'?icon('check-circle',18,'#27ae60'):icon('x-circle',18,'#e74c3c')}</td>
+      <td style="font-weight:600;color:var(--dark-text)">${row.area}</td>
+      <td style="color:var(--mid-blue);font-weight:600">${row.norm}</td>
+      <td style="color:#555;max-width:300px">${row.requirement}</td>
+      <td><span class="badge" style="background:#3498db18;color:#3498db">${row.source}</span></td>
+      <td>${row.severity?`<span class="severity severity-${row.severity}">${row.severity}</span>`:'<span style="color:#27ae60;font-size:11px;font-weight:600">OK</span>'}</td>
+    </tr>
+  `).join('');
+}
+function setGapFilter(f) { gapFilter=f; renderView3(); }
+
+// VIEW 4
+function renderView4() {
+  const layout = document.getElementById('bowtieLayout');
+  const bColor = s => s==='ok'?'ok':'degraded';
+
+  layout.innerHTML = `
+    <div class="bowtie-col">
+      <div class="bowtie-col-title" style="color:#e67e22">Amenazas</div>
+      ${threats.map(t => `<div class="bowtie-threat">${icon('alert-triangle',14,'#e74c3c')} <span style="flex:1">${t.name}</span></div>`).join('')}
+    </div>
+    <div class="bowtie-barriers">
+      <div style="font-size:11px;font-weight:700;color:var(--accent-blue);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Barreras Prev.</div>
+      ${threats.map(t => `<div class="barrier-box barrier-${bColor(t.status)}">${t.barrier}</div>`).join('')}
+    </div>
+    <div class="bowtie-center">
+      <div class="bowtie-event">
+        ${icon('alert-circle',28,'white')}
+        <div class="bowtie-event-label">VOLCAMIENTO</div>
+        <div class="bowtie-event-sub">DE CAEX</div>
+      </div>
+      <div style="font-size:10px;color:#95a5a6;margin-top:8px;text-align:center">Evento Top</div>
+    </div>
+    <div class="bowtie-barriers">
+      <div style="font-size:11px;font-weight:700;color:var(--accent-blue);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Barreras Mitig.</div>
+      ${consequences.map(c => `<div class="barrier-box barrier-${bColor(c.status)}">${c.barrier}</div>`).join('')}
+    </div>
+    <div class="bowtie-col">
+      <div class="bowtie-col-title" style="color:#e74c3c">Consecuencias</div>
+      ${consequences.map(c => `<div class="bowtie-threat"><span style="flex:1">${c.name}</span> ${icon('alert-triangle',14,'#e67e22')}</div>`).join('')}
+    </div>
+  `;
+
+  const summary = [{label:"Barreras activas",value:"6/8",color:"#27ae60",pct:75},{label:"Degradadas",value:"2/8",color:"#f39c12",pct:25},{label:"Fallidas",value:"0/8",color:"#e74c3c",pct:0}];
+  document.getElementById('barrierSummary').innerHTML = summary.map(b => `
+    <div class="card">
+      <div style="font-size:12px;color:#95a5a6;margin-bottom:4px">${b.label}</div>
+      <div style="font-size:28px;font-weight:800;color:${b.color}">${b.value}</div>
+      <div style="height:4px;background:#e8edf2;border-radius:2px;margin-top:8px"><div style="height:4px;background:${b.color};border-radius:2px;width:${b.pct}%"></div></div>
+    </div>
+  `).join('');
+}
+
+// VIEW 5
+function renderView5() {
+  const tabsEl = document.getElementById('view5Tabs');
+  tabsEl.innerHTML = `
+    <button class="tab-btn" style="background:${view5Tab==='plans'?'var(--dark-blue)':'#e8edf2'};color:${view5Tab==='plans'?'white':'var(--dark-text)'}" onclick="setView5Tab('plans')">Planes de Cierre (${closurePlans.length})</button>
+    <button class="tab-btn" style="background:${view5Tab==='recognitions'?'var(--green)':'#e8edf2'};color:${view5Tab==='recognitions'?'white':'var(--dark-text)'}" onclick="setView5Tab('recognitions')">Reconocimientos (${recognitions.length})</button>
+  `;
+
+  const content = document.getElementById('view5Content');
+  const sevColor = s => s==='critical'?'#e74c3c':s==='high'?'#e67e22':s==='medium'?'#f39c12':'#95a5a6';
+  const progColor = p => p>=70?'#27ae60':p>=40?'#f39c12':'#e74c3c';
+  const levelColor = l => l==='gold'?'#f1c40f':'#95a5a6';
+
+  if(view5Tab==='plans') {
+    content.innerHTML = closurePlans.map(plan => `
+      <div class="card" style="margin-bottom:12px">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+          <span class="severity severity-${plan.severity}">${plan.severity}</span>
+          <span style="font-weight:800;color:var(--dark-text);font-size:14px">${plan.id}</span>
+          <span style="color:#555;font-size:13px;flex:1">${plan.gap}</span>
+          <span style="font-size:12px;color:#95a5a6">${icon('clock',12,'#95a5a6')} ${plan.deadline}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:12px">
+          <div class="progress-track"><div class="progress-fill" style="background:${progColor(plan.progress)};width:${plan.progress}%"></div></div>
+          <span style="font-size:14px;font-weight:800;color:${progColor(plan.progress)}">${plan.progress}%</span>
+          <span class="badge" style="background:#2b649018;color:#2b6490">${plan.responsible}</span>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          ${plan.actions.map(a => {
+            const done = a.includes('completada');
+            return `<span class="action-tag ${done?'done':'pending'}">${done?icon('check-circle',12,'#27ae60'):icon('clock',12,'#95a5a6')} ${a.replace(' (completada)','')}</span>`;
+          }).join('')}
+        </div>
+      </div>
+    `).join('');
+  } else {
+    content.innerHTML = `<div class="grid-2">${recognitions.map(r => `
+      <div class="card recognition-card" style="border-left-color:${levelColor(r.level)}">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          ${icon('award',20,levelColor(r.level))}
+          <span style="font-weight:700;font-size:14px;color:var(--dark-text)">${r.area}</span>
+          <span style="margin-left:auto;font-size:11px;color:#95a5a6">${r.date}</span>
+        </div>
+        <p style="margin:0;font-size:13px;color:#555">${r.achievement}</p>
+      </div>
+    `).join('')}</div>`;
+  }
+}
+function setView5Tab(t) { view5Tab=t; renderView5(); }
+
+// VIEW 6
+function renderView6() {
+  let totalSavings = 0;
+  roiItems.forEach(item => { totalSavings += (item.before - item.after) * item.costPerUnit; });
+  const roi = ((totalSavings - investmentAnnual) / investmentAnnual * 100).toFixed(0);
+  const payback = ((investmentAnnual / totalSavings) * 12).toFixed(1);
+
+  const kpis = [
+    { label:"Ahorro anual estimado", value:`$${(totalSavings/1e6).toFixed(1)}M`, sub:"USD", color:"#27ae60" },
+    { label:"Inversión anual PRAXXI", value:`$${(investmentAnnual/1e3).toFixed(0)}K`, sub:"USD", color:"#3498db" },
+    { label:"ROI", value:`${roi}%`, sub:"retorno", color:"#e67e22" },
+    { label:"Payback", value:payback, sub:"meses", color:"#2b6490" },
+  ];
+  document.getElementById('roiKpis').innerHTML = kpis.map(k => `
+    <div class="card" style="text-align:center">
+      <div style="font-size:11px;color:#95a5a6;margin-bottom:4px">${k.label}</div>
+      <div style="font-size:32px;font-weight:800;color:${k.color}">${k.value}</div>
+      <div style="font-size:11px;color:#bdc3c7">${k.sub}</div>
+    </div>
+  `).join('');
+
+  document.getElementById('roiTableCard').innerHTML = `
+    <table class="roi-table">
+      <thead><tr>
+        <th>Categoría de ahorro</th><th style="text-align:center">Sin PRAXXI</th><th style="text-align:center">Con PRAXXI</th><th style="text-align:center">Reducción</th><th style="text-align:right">Ahorro (USD)</th>
+      </tr></thead>
+      <tbody>
+        ${roiItems.map(item => {
+          const diff = item.before - item.after;
+          const saving = diff * item.costPerUnit;
+          const pct = ((diff/item.before)*100).toFixed(0);
+          return `<tr>
+            <td style="font-weight:600;color:var(--dark-text)">${item.category}</td>
+            <td style="text-align:center;color:#e74c3c;font-weight:600">${item.before} ${item.unit}</td>
+            <td style="text-align:center;color:#27ae60;font-weight:600">${item.after} ${item.unit}</td>
+            <td style="text-align:center"><span style="background:rgba(39,174,96,0.1);color:#27ae60;padding:2px 8px;border-radius:4px;font-weight:700;font-size:12px">-${pct}%</span></td>
+            <td style="text-align:right;font-weight:800;color:#27ae60;font-size:15px">$${(saving/1e3).toFixed(0)}K</td>
+          </tr>`;
+        }).join('')}
+        <tr class="roi-total">
+          <td colspan="4" style="padding:12px 16px;font-weight:800;font-size:14px;color:var(--dark-text)">TOTAL AHORRO ANUAL</td>
+          <td style="padding:12px 16px;text-align:right;font-weight:800;font-size:18px;color:#27ae60">$${(totalSavings/1e6).toFixed(1)}M</td>
+        </tr>
+      </tbody>
+    </table>
+  `;
+}
+
+// ══════════════════════════════════════════════
+// VIEW 7 — ÍNDICE DE RIESGO INDIVIDUAL + MAPA
+// ══════════════════════════════════════════════
+
+const riskWorkers = [
+  { id:"W-001", name:"Carlos Muñoz", role:"Operador CAEX 793F", area:"Mina Rajo Norte", zone:"rajo", x:18, y:25, iri:92, trend:"up",
+    factors:{ fatiga:95, exposicion:80, velocidad:88, epp:100, historial:72, competencias:90 },
+    alerts:["Fatiga: 11.5 hrs continuas de operación","Velocidad: 3 excesos en última hora","Zona de berma degradada (km 4.2)"] },
+  { id:"W-002", name:"Roberto Figueroa", role:"Operador CAEX 797F", area:"Mina Rajo Norte", zone:"rajo", x:28, y:32, iri:78, trend:"up",
+    factors:{ fatiga:82, exposicion:70, velocidad:75, epp:100, historial:65, competencias:85 },
+    alerts:["Fatiga: 9 hrs continuas","Acercamiento a geocerca zona exclusión"] },
+  { id:"W-003", name:"Luis Pereira", role:"Mecánico Mantención", area:"Taller Mantención", zone:"taller", x:72, y:60, iri:71, trend:"stable",
+    factors:{ fatiga:45, exposicion:60, velocidad:0, epp:68, competencias:80, historial:90 },
+    alerts:["EPP: no se detectó guantes en última intervención","LOTO: sin registro fotográfico"] },
+  { id:"W-004", name:"Andrés Soto", role:"Operador Chancador Primario", area:"Planta Chancado", zone:"planta", x:55, y:35, iri:85, trend:"up",
+    factors:{ fatiga:60, exposicion:95, velocidad:0, epp:90, historial:78, competencias:88 },
+    alerts:["Exposición ruido: 91 dB(A) acumulado turno","Polvo PM10 sobre límite en última hora"] },
+  { id:"W-005", name:"María González", role:"Supervisora de Turno", area:"Planta SAG", zone:"planta", x:60, y:42, iri:35, trend:"down",
+    factors:{ fatiga:30, exposicion:40, velocidad:0, epp:100, historial:20, competencias:95 },
+    alerts:[] },
+  { id:"W-006", name:"Pedro Valenzuela", role:"Conductor Bus Personal", area:"Transporte", zone:"camino", x:40, y:55, iri:52, trend:"stable",
+    factors:{ fatiga:55, exposicion:20, velocidad:50, epp:100, historial:40, competencias:90 },
+    alerts:["Velocidad: 1 exceso menor en curva km 2.8"] },
+  { id:"W-007", name:"José Contreras", role:"Operador Perforadora", area:"Mina Rajo Norte", zone:"rajo", x:22, y:18, iri:44, trend:"down",
+    factors:{ fatiga:40, exposicion:55, velocidad:0, epp:100, historial:30, competencias:92 },
+    alerts:[] },
+  { id:"W-008", name:"Diego Ramírez", role:"Técnico Eléctrico", area:"Subestación", zone:"taller", x:78, y:55, iri:38, trend:"stable",
+    factors:{ fatiga:35, exposicion:45, velocidad:0, epp:95, historial:25, competencias:88 },
+    alerts:[] },
+  { id:"W-009", name:"Tomás Vega", role:"Contratista ACME - Soldador", area:"Taller Mantención", zone:"taller", x:70, y:65, iri:88, trend:"up",
+    factors:{ fatiga:70, exposicion:85, velocidad:0, epp:75, historial:95, competencias:60 },
+    alerts:["Inducción vencida (14 meses)","EPP: sin máscara de soldadura certificada","Empresa ACME con no conformidades activas"] },
+  { id:"W-010", name:"Felipe Morales", role:"Operador Cargador Frontal", area:"Acopio Mineral", zone:"rajo", x:35, y:22, iri:61, trend:"stable",
+    factors:{ fatiga:65, exposicion:55, velocidad:58, epp:100, historial:50, competencias:82 },
+    alerts:["Fatiga: se acerca a límite de 10 hrs"] },
+  { id:"W-011", name:"Ignacio Rojas", role:"Inspector Geotécnico", area:"Relave Sur", zone:"relave", x:85, y:80, iri:28, trend:"down",
+    factors:{ fatiga:20, exposicion:30, velocidad:0, epp:100, historial:15, competencias:95 },
+    alerts:[] },
+  { id:"W-012", name:"Sebastián López", role:"Guardia de Seguridad", area:"Accesos Faena", zone:"acceso", x:10, y:75, iri:18, trend:"stable",
+    factors:{ fatiga:15, exposicion:10, velocidad:0, epp:100, historial:10, competencias:80 },
+    alerts:[] },
+];
+
+const mapZones = [
+  { name:"Mina Rajo Norte", x:10, y:10, w:32, h:35, color:"rgba(231,76,60,0.12)" },
+  { name:"Planta Concentradora", x:45, y:20, w:25, h:30, color:"rgba(52,152,219,0.12)" },
+  { name:"Taller / Mantención", x:62, y:48, w:22, h:25, color:"rgba(230,126,34,0.12)" },
+  { name:"Relave Sur", x:75, y:70, w:20, h:22, color:"rgba(26,188,156,0.12)" },
+  { name:"Caminos / Transporte", x:30, y:45, w:20, h:18, color:"rgba(149,165,166,0.08)" },
+  { name:"Accesos", x:3, y:65, w:15, h:20, color:"rgba(52,73,94,0.1)" },
+];
+
+let selectedWorker = riskWorkers[0];
+
+function iriColor(val) {
+  if(val >= 85) return '#e74c3c';
+  if(val >= 70) return '#e67e22';
+  if(val >= 50) return '#f39c12';
+  return '#27ae60';
+}
+
+function iriLevel(val) {
+  if(val >= 85) return 'CRÍTICO';
+  if(val >= 70) return 'ALTO';
+  if(val >= 50) return 'MEDIO';
+  return 'BAJO';
+}
+
+function renderView7() {
+  const total = riskWorkers.length;
+  const criticos = riskWorkers.filter(w=>w.iri>=85).length;
+  const altos = riskWorkers.filter(w=>w.iri>=70&&w.iri<85).length;
+  const avgIri = Math.round(riskWorkers.reduce((s,w)=>s+w.iri,0)/total);
+  const now = new Date();
+  const ts = now.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const w = selectedWorker;
+
+  // KPIs — dark style matching original PRAXXI Intelligence
+  document.getElementById('riskKpis').innerHTML = [
+    { label:"Personal en faena", value:total, color:"#5dade2" },
+    { label:"IRI Promedio", value:avgIri, color:iriColor(avgIri) },
+    { label:"Riesgo Crítico (≥85)", value:criticos, color:"#e74c3c" },
+    { label:"Riesgo Alto (70-84)", value:altos, color:"#e67e22" },
+  ].map(k => `
+    <div style="background:#1e3448;border-radius:10px;padding:16px;text-align:center;border:1px solid #2a4a63">
+      <div style="font-size:10px;color:#6b8fa8;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">${k.label}</div>
+      <div style="font-size:32px;font-weight:800;color:${k.color}">${k.value}</div>
+    </div>
+  `).join('');
+
+  // FULL DARK LAYOUT — map left, detail right
+  const sorted = [...riskWorkers].sort((a,b) => b.iri - a.iri);
+
+  const factors = [
+    { key:'fatiga', label:'Fatiga', ic:'clock' },
+    { key:'exposicion', label:'Exposición', ic:'activity' },
+    { key:'velocidad', label:'Velocidad', ic:'gauge' },
+    { key:'epp', label:'EPP', ic:'shield' },
+    { key:'historial', label:'Historial', ic:'file-text' },
+    { key:'competencias', label:'Competencias', ic:'award' },
+  ];
+
+  // MAP — full dark blueprint style
+  document.getElementById('riskMap').innerHTML = `
+    <div class="risk-map-bg" style="background:linear-gradient(145deg,#0f1e2e,#162a3e,#1a3040)">
+      <!-- Blueprint grid -->
+      <svg width="100%" height="100%" style="position:absolute;top:0;left:0;pointer-events:none">
+        ${Array.from({length:24},(_,i)=>`<line x1="${(i+1)*4.16}%" y1="0" x2="${(i+1)*4.16}%" y2="100%" stroke="#1e3a52" stroke-width="0.5"/>`).join('')}
+        ${Array.from({length:14},(_,i)=>`<line x1="0" y1="${(i+1)*7.14}%" x2="100%" y2="${(i+1)*7.14}%" stroke="#1e3a52" stroke-width="0.5"/>`).join('')}
+      </svg>
+      <!-- Topographic contour lines (decorative) -->
+      <svg width="100%" height="100%" style="position:absolute;top:0;left:0;pointer-events:none;opacity:0.15">
+        <ellipse cx="22%" cy="25%" rx="18%" ry="14%" fill="none" stroke="#2980b9" stroke-width="0.5" stroke-dasharray="4,4"/>
+        <ellipse cx="22%" cy="25%" rx="14%" ry="10%" fill="none" stroke="#2980b9" stroke-width="0.5" stroke-dasharray="4,4"/>
+        <ellipse cx="55%" cy="35%" rx="12%" ry="10%" fill="none" stroke="#2980b9" stroke-width="0.5" stroke-dasharray="4,4"/>
+        <ellipse cx="73%" cy="60%" rx="10%" ry="8%" fill="none" stroke="#2980b9" stroke-width="0.5" stroke-dasharray="4,4"/>
+        <path d="M5,370 Q150,320 250,350 T450,330" fill="none" stroke="#1e5577" stroke-width="1" opacity="0.4"/>
+        <path d="M0,280 Q200,250 350,270 T600,260" fill="none" stroke="#1e5577" stroke-width="0.5" opacity="0.3"/>
+      </svg>
+      <!-- Zones with glow -->
+      ${mapZones.map(z => `
+        <div class="map-zone" style="left:${z.x}%;top:${z.y}%;width:${z.w}%;height:${z.h}%;background:${z.color};border-color:rgba(52,152,219,0.15)">
+          <span class="map-zone-label" style="color:rgba(93,173,226,0.6);font-size:10px;font-weight:600">${z.name}</span>
+        </div>
+      `).join('')}
+      <!-- Connection lines between workers (decorative) -->
+      <svg width="100%" height="100%" style="position:absolute;top:0;left:0;pointer-events:none;opacity:0.12">
+        ${riskWorkers.filter(w2=>w2.iri>=70).map(w2 =>
+          `<line x1="${w2.x}%" y1="${w2.y}%" x2="50%" y2="50%" stroke="${iriColor(w2.iri)}" stroke-width="0.5" stroke-dasharray="3,6"/>`
+        ).join('')}
+      </svg>
+      <!-- Worker dots -->
+      ${riskWorkers.map(wr => `
+        <div class="map-dot" onclick="selectWorker('${wr.id}')"
+             style="left:${wr.x}%;top:${wr.y}%;background:${iriColor(wr.iri)};
+             ${selectedWorker.id===wr.id?'transform:scale(1.4);box-shadow:0 0 0 4px rgba(255,255,255,0.3),0 0 20px '+iriColor(wr.iri)+'80;z-index:10;':'box-shadow:0 0 10px '+iriColor(wr.iri)+'40;'}"
+             title="${wr.name} — IRI: ${wr.iri}">
+          ${wr.iri>=85?'<div class="pulse"></div>':''}
+          ${wr.iri}
+        </div>
+      `).join('')}
+      <!-- Selected worker label -->
+      <div style="position:absolute;left:${w.x}%;top:${Math.max(2,w.y-8)}%;transform:translateX(-50%);background:rgba(0,0,0,0.75);padding:3px 10px;border-radius:4px;font-size:10px;color:white;white-space:nowrap;pointer-events:none;border:1px solid ${iriColor(w.iri)}40">
+        ${w.name} · ${w.role}
+      </div>
+      <!-- Timestamp -->
+      <div class="map-timestamp" style="background:rgba(0,0,0,0.6);border:1px solid #2a4a63">
+        <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#e74c3c;animation:pulse 1.5s infinite"></span>
+        LIVE · ${ts}
+      </div>
+      <!-- Legend -->
+      <div class="map-legend" style="background:rgba(0,0,0,0.6);border:1px solid #2a4a63">
+        <div class="map-legend-item"><div class="map-legend-dot" style="background:#e74c3c;box-shadow:0 0 6px #e74c3c"></div>Crítico ≥85</div>
+        <div class="map-legend-item"><div class="map-legend-dot" style="background:#e67e22;box-shadow:0 0 6px #e67e22"></div>Alto 70-84</div>
+        <div class="map-legend-item"><div class="map-legend-dot" style="background:#f39c12;box-shadow:0 0 6px #f39c12"></div>Medio 50-69</div>
+        <div class="map-legend-item"><div class="map-legend-dot" style="background:#27ae60;box-shadow:0 0 6px #27ae60"></div>Bajo &lt;50</div>
+      </div>
+      <!-- Stats overlay top-left -->
+      <div style="position:absolute;top:12px;left:12px;background:rgba(0,0,0,0.6);border:1px solid #2a4a63;border-radius:8px;padding:10px 14px">
+        <div style="font-size:9px;color:#5dade2;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px">PRAXXI Intelligence</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.7)">${total} personas · ${criticos} críticos · ${altos} altos</div>
+      </div>
+    </div>
+  `;
+
+  // RANKING — dark style
+  document.getElementById('riskRanking').innerHTML = `
+    <div style="font-size:10px;font-weight:700;color:#5dade2;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px">Ranking IRI en tiempo real</div>
+    ${sorted.map((wr,i) => `
+      <div onclick="selectWorker('${wr.id}')" style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;cursor:pointer;
+        background:${selectedWorker.id===wr.id?'#1a3a55':'#162535'};
+        border:1px solid ${selectedWorker.id===wr.id?iriColor(wr.iri)+'60':'#1e3a52'};
+        transition:all 0.15s">
+        <div style="width:28px;height:28px;border-radius:50%;background:${iriColor(wr.iri)};display:flex;align-items:center;justify-content:center;color:white;font-size:10px;font-weight:800;flex-shrink:0;box-shadow:0 0 8px ${iriColor(wr.iri)}40">${wr.iri}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.9);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${wr.name}</div>
+          <div style="font-size:10px;color:#5a7a90;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${wr.role}</div>
+        </div>
+        ${wr.trend==='up'?'<span style="color:#e74c3c;font-size:11px">▲</span>':wr.trend==='down'?'<span style="color:#27ae60;font-size:11px">▼</span>':'<span style="color:#4a6a80;font-size:11px">●</span>'}
+      </div>
+    `).join('')}
+  `;
+
+  // DETAIL PANEL — dark style
+  document.getElementById('riskDetailPanel').innerHTML = `
+    <div style="background:#162535;border-radius:12px;overflow:hidden;border:1px solid #2a4a63">
+      <!-- Header -->
+      <div style="padding:16px 20px;background:linear-gradient(90deg,${iriColor(w.iri)}15,transparent);border-bottom:1px solid #1e3a52;display:flex;align-items:center;gap:16px">
+        <div style="width:64px;height:64px;border-radius:50%;background:radial-gradient(circle,${iriColor(w.iri)},${iriColor(w.iri)}cc);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:white;box-shadow:0 0 20px ${iriColor(w.iri)}40;flex-shrink:0">${w.iri}</div>
+        <div style="flex:1">
+          <div style="font-size:18px;font-weight:800;color:white">${w.name}</div>
+          <div style="font-size:13px;color:#6b8fa8">${w.role} · ${w.area}</div>
+          <div style="margin-top:6px;display:flex;gap:8px;align-items:center">
+            <span style="background:${iriColor(w.iri)}25;color:${iriColor(w.iri)};padding:3px 10px;border-radius:4px;font-size:11px;font-weight:700;border:1px solid ${iriColor(w.iri)}40">${iriLevel(w.iri)}</span>
+            <span style="font-size:11px;color:#4a6a80">ID: ${w.id}</span>
+          </div>
+        </div>
+        ${w.alerts.length>0?`
+          <div style="background:rgba(231,76,60,0.08);border:1px solid rgba(231,76,60,0.25);border-radius:8px;padding:10px 14px;max-width:380px">
+            <div style="font-size:9px;font-weight:700;color:#e74c3c;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px">${icon('alert-circle',11,'#e74c3c')} ${w.alerts.length} ALERTAS ACTIVAS</div>
+            ${w.alerts.map(a => `<div style="font-size:11px;color:#e88a7d;padding:2px 0">• ${a}</div>`).join('')}
+          </div>
+        `:`<div style="background:rgba(39,174,96,0.08);border:1px solid rgba(39,174,96,0.25);border-radius:8px;padding:10px 14px">
+            <div style="font-size:11px;color:#27ae60;font-weight:600">${icon('check-circle',12,'#27ae60')} Sin alertas activas</div>
+          </div>`}
+      </div>
+      <!-- Factors grid -->
+      <div style="padding:16px 20px">
+        <div style="font-size:9px;font-weight:700;color:#5dade2;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:14px">Composición del índice de riesgo</div>
+        <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px">
+          ${factors.map(f => {
+            const val = w.factors[f.key];
+            return `
+              <div style="text-align:center">
+                <div style="position:relative;width:56px;height:56px;margin:0 auto 8px">
+                  <svg width="56" height="56" viewBox="0 0 56 56">
+                    <circle cx="28" cy="28" r="24" fill="none" stroke="#1e3a52" stroke-width="4"/>
+                    <circle cx="28" cy="28" r="24" fill="none" stroke="${iriColor(val)}" stroke-width="4"
+                      stroke-dasharray="${val*1.508} ${150.8-val*1.508}"
+                      stroke-linecap="round" transform="rotate(-90 28 28)" style="filter:drop-shadow(0 0 4px ${iriColor(val)}60)"/>
+                  </svg>
+                  <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:${iriColor(val)}">${val}</div>
+                </div>
+                <div style="font-size:11px;font-weight:600;color:rgba(255,255,255,0.8)">${f.label}</div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function selectWorker(id) {
+  selectedWorker = riskWorkers.find(w => w.id === id);
+  renderView7();
+}
+
+// ══════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════
+renderNav();
+renderCurrentView();
+</script>
+</body>
+</html>
